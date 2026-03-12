@@ -1,0 +1,28 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model TimelineEvent {
+  id        Int      @id @default(autoincrement())
+  name      String
+  from      String   // display string e.g. "27 BC", "1347"
+  to        String   // display string e.g. "476 AD", "1353"
+  yearFrom  Int      // numeric year for scrubber (negative = BC)
+  yearTo    Int      // numeric year for scrubber
+  colour       String   // hex colour e.g. "#e63946"
+  locations    String   // JSON array of ISO 3166-1 alpha-3 codes
+  influencedBy String   @default("[]") // JSON array of event names
+  createdAt    DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Setting {
+  id    Int    @id @default(autoincrement())
+  key   String @unique
+  value String
+}
