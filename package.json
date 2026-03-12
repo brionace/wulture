@@ -10,7 +10,11 @@
     "build:client": "cd client && npx vite build",
     "db:migrate": "npx prisma migrate dev",
     "db:seed": "npx tsx prisma/seed.ts",
-    "db:studio": "npx prisma studio"
+    "db:studio": "npx prisma studio",
+    "build": "cd client && npx vite build",
+    "build:server": "npx esbuild server/src/index.ts --bundle --platform=node --format=esm --outfile=dist/server.mjs --external:better-sqlite3 --external:@prisma/client --external:@prisma/adapter-better-sqlite3",
+    "build:all": "npm run build && npm run build:server",
+    "start": "node dist/server.mjs"
   },
   "prisma": {
     "seed": "npx tsx prisma/seed.ts"
