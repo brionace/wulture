@@ -1,2 +1,3 @@
 // app.js — Plesk/Passenger entry point
-import("./server/src/index.ts");
+// Node 25+ handles TypeScript natively (type stripping)
+await import("./server/src/index.ts");

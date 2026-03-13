@@ -1,3 +1,4 @@
+import "dotenv/config";
 import express from "express";
 import cors from "cors";
 import path from "node:path";
@@ -9,7 +10,18 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-app.use(cors({ origin: /localhost:\d+/ }));
+const allowedOrigins = process.env.ALLOWED_ORIGINS?.split(",") ?? [];
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      if (!origin) return callback(null, true);
+      if (/^https?:\/\/localhost(:\d+)?$/.test(origin))
+        return callback(null, true);
+      if (allowedOrigins.includes(origin)) return callback(null, true);
+      callback(null, false);
+    },
+  }),
+);
 app.use(express.json());
 
 // API routes
@@ -20,7 +32,7 @@ app.use("/api/settings", settingsRouter);
 // Serve built client in production
 const clientDist = path.resolve(__dirname, "../../client/dist");
 app.use(express.static(clientDist));
-app.get("*", (_req, res) => {
+app.use((_req, res) => {
   res.sendFile(path.join(clientDist, "index.html"));
 });
 
