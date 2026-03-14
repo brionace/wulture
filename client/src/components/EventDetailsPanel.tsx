@@ -44,27 +44,25 @@ function EventDetailsContent({
             {title}
           </div>
         </div>
-        <div className="flex items-center gap-3">
-          <button
-            type="button"
-            onClick={onToggleCollapse}
-            className="text-xs text-gray-300 hover:text-gray-100"
-            title={collapsed ? "Expand" : "Collapse"}
+        <button
+          type="button"
+          onClick={onToggleCollapse}
+          className="rounded-md p-1.5 text-gray-300 hover:bg-gray-800 hover:text-gray-100"
+          title={collapsed ? "Expand panel" : "Collapse panel"}
+          aria-label={collapsed ? "Expand panel" : "Collapse panel"}
+        >
+          <svg
+            className={`h-4 w-4 transition-transform ${collapsed ? "rotate-180" : ""}`}
+            viewBox="0 0 20 20"
+            fill="currentColor"
           >
-            {collapsed ? "Expand" : "Collapse"}
-          </button>
-          {safeLink ? (
-            <a
-              href={safeLink}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-xs text-indigo-300 hover:text-indigo-200"
-              title="Open in new tab"
-            >
-              Open
-            </a>
-          ) : null}
-        </div>
+            <path
+              fillRule="evenodd"
+              d="M5.23 7.21a.75.75 0 011.06.02L10 11.12l3.71-3.9a.75.75 0 111.08 1.04l-4.25 4.46a.75.75 0 01-1.08 0L5.21 8.27a.75.75 0 01.02-1.06z"
+              clipRule="evenodd"
+            />
+          </svg>
+        </button>
       </div>
 
       {!collapsed && (

@@ -20,6 +20,8 @@ export default function SettingsPanel() {
     toggleFeatured,
     showInfluence,
     setShowInfluence,
+    mapProjection,
+    setMapProjection,
   } = useSettings();
   const { playSpeed, setPlaySpeed } = useTimeline();
 
@@ -129,6 +131,24 @@ export default function SettingsPanel() {
             </label>
             <p className="text-gray-500 text-xs mt-1 ml-7">
               Highlight territories of influencing empires with lower opacity
+            </p>
+          </div>
+
+          {/* Map projection */}
+          <div className="mb-6">
+            <h3 className="text-gray-300 text-sm font-medium mb-2">Map View</h3>
+            <select
+              value={mapProjection}
+              onChange={(e) =>
+                setMapProjection(e.target.value as "flat" | "rounded")
+              }
+              className="w-full rounded-md border border-gray-700 bg-gray-800 px-3 py-2 text-sm text-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            >
+              <option value="flat">Flat Map</option>
+              <option value="rounded">Rounded 2D Map</option>
+            </select>
+            <p className="text-gray-500 text-xs mt-1">
+              Rounded mode uses a globe-like 2D projection.
             </p>
           </div>
 

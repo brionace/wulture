@@ -30,6 +30,8 @@ interface SettingsContextValue {
   toggleFeatured: (id: number) => Promise<void>;
   showInfluence: boolean;
   setShowInfluence: (v: boolean) => void;
+  mapProjection: "flat" | "rounded";
+  setMapProjection: (value: "flat" | "rounded") => void;
   loading: boolean;
 }
 
@@ -42,6 +44,9 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
   );
   const [loading, setLoading] = useState(true);
   const [showInfluence, setShowInfluence] = useState(false);
+  const [mapProjection, setMapProjection] = useState<"flat" | "rounded">(
+    "flat",
+  );
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");
   const [selectedTags, setSelectedTags] = useState<Set<string>>(new Set());
@@ -144,6 +149,8 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
         toggleFeatured,
         showInfluence,
         setShowInfluence,
+        mapProjection,
+        setMapProjection,
         loading,
       }}
     >
