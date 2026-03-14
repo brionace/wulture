@@ -8,9 +8,9 @@ function formatYear(year: number): string {
 
 export default function Legend() {
   const { currentYear } = useTimeline();
-  const { events, visibleEventIds } = useSettings();
+  const { filteredEvents, visibleEventIds } = useSettings();
 
-  const activeEvents = events.filter(
+  const activeEvents = filteredEvents.filter(
     (e) =>
       visibleEventIds.has(e.id) &&
       currentYear >= e.yearFrom &&

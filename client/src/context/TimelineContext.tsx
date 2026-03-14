@@ -5,8 +5,11 @@ import {
   useCallback,
   useRef,
   useEffect,
+  useMemo,
   type ReactNode,
 } from "react";
+import { useSettings } from "./SettingsContext";
+import type { TimelineEventParsed } from "../types";
 
 interface TimelineContextValue {
   currentYear: number;
@@ -17,19 +20,53 @@ interface TimelineContextValue {
   setPlaySpeed: (speed: number) => void;
   minYear: number;
   maxYear: number;
+  activeEvent: TimelineEventParsed | null;
 }
 
 const TimelineContext = createContext<TimelineContextValue | null>(null);
 
-const MIN_YEAR = -500;
-const MAX_YEAR = 2025;
+const DEFAULT_MIN_YEAR = -500;
+const DEFAULT_MAX_YEAR = new Date().getFullYear();
 
 export function TimelineProvider({ children }: { children: ReactNode }) {
-  const [currentYear, setCurrentYear] = useState(MIN_YEAR);
+  const { events, filteredEvents, visibleEventIds } = useSettings();
+  const timelineEvents = filteredEvents.length > 0 ? filteredEvents : events;
+  const minYear = useMemo(
+    () => timelineEvents[0]?.yearFrom ?? DEFAULT_MIN_YEAR,
+    [timelineEvents],
+  );
+  const maxYear = useMemo(
+    () =>
+      timelineEvents.reduce(
+        (latest, event) => Math.max(latest, event.yearTo),
+        DEFAULT_MAX_YEAR,
+      ),
+    [timelineEvents],
+  );
+  const [currentYear, setCurrentYear] = useState(DEFAULT_MIN_YEAR);
   const [isPlaying, setIsPlaying] = useState(false);
   const [playSpeed, setPlaySpeed] = useState(10);
   const lastFrameTime = useRef<number | null>(null);
   const animRef = useRef<number>(0);
+
+  const activeEvent = useMemo(
+    () =>
+      timelineEvents.find(
+        (event) =>
+          visibleEventIds.has(event.id) &&
+          currentYear >= event.yearFrom &&
+          currentYear <= event.yearTo,
+      ) ?? null,
+    [timelineEvents, visibleEventIds, currentYear],
+  );
+
+  useEffect(() => {
+    setCurrentYear((prev) => {
+      if (prev < minYear) return minYear;
+      if (prev > maxYear) return maxYear;
+      return prev;
+    });
+  }, [minYear, maxYear]);
 
   const togglePlay = useCallback(() => {
     setIsPlaying((prev) => !prev);
@@ -47,9 +84,9 @@ export function TimelineProvider({ children }: { children: ReactNode }) {
         const delta = (timestamp - lastFrameTime.current) / 1000; // seconds
         setCurrentYear((prev) => {
           const next = prev + delta * playSpeed;
-          if (next >= MAX_YEAR) {
+          if (next >= maxYear) {
             setIsPlaying(false);
-            return MAX_YEAR;
+            return maxYear;
           }
           return next;
         });
@@ -60,7 +97,7 @@ export function TimelineProvider({ children }: { children: ReactNode }) {
 
     animRef.current = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(animRef.current);
-  }, [isPlaying, playSpeed]);
+  }, [isPlaying, playSpeed, maxYear]);
 
   return (
     <TimelineContext.Provider
@@ -71,8 +108,9 @@ export function TimelineProvider({ children }: { children: ReactNode }) {
         togglePlay,
         playSpeed,
         setPlaySpeed,
-        minYear: MIN_YEAR,
-        maxYear: MAX_YEAR,
+        minYear,
+        maxYear,
+        activeEvent,
       }}
     >
       {children}

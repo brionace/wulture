@@ -24,7 +24,8 @@ export default function WorldMap() {
     height: window.innerHeight,
   });
   const { currentYear } = useTimeline();
-  const { events, visibleEventIds, showInfluence } = useSettings();
+  const { events, filteredEvents, visibleEventIds, showInfluence } =
+    useSettings();
 
   // Fetch world data
   useEffect(() => {
@@ -67,7 +68,7 @@ export default function WorldMap() {
     >();
 
     // First pass: direct overlays
-    for (const event of events) {
+    for (const event of filteredEvents) {
       if (!visibleEventIds.has(event.id)) continue;
       if (currentYear < event.yearFrom || currentYear > event.yearTo) continue;
 
@@ -122,7 +123,7 @@ export default function WorldMap() {
     }
 
     return overlayMap;
-  }, [events, visibleEventIds, currentYear, showInfluence]);
+  }, [events, filteredEvents, visibleEventIds, currentYear, showInfluence]);
 
   const graticule = useMemo(() => geoGraticule()(), []);
 

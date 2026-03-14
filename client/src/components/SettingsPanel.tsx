@@ -6,12 +6,30 @@ export default function SettingsPanel() {
   const [isOpen, setIsOpen] = useState(false);
   const {
     events,
+    filteredEvents,
     visibleEventIds,
     toggleEventVisibility,
+    searchTerm,
+    setSearchTerm,
+    selectedCategory,
+    setSelectedCategory,
+    selectedTags,
+    toggleTag,
+    showOnlyFeatured,
+    setShowOnlyFeatured,
+    toggleFeatured,
     showInfluence,
     setShowInfluence,
   } = useSettings();
   const { playSpeed, setPlaySpeed } = useTimeline();
+
+  const categories = Array.from(
+    new Set(events.map((event) => event.category).filter(Boolean)),
+  ).sort();
+
+  const tags = Array.from(
+    new Set(events.flatMap((event) => event.tagsNames)),
+  ).sort();
 
   return (
     <>
@@ -114,11 +132,86 @@ export default function SettingsPanel() {
             </p>
           </div>
 
+          {/* Search and filtering */}
+          <div className="mb-6 space-y-4">
+            <div>
+              <h3 className="text-gray-300 text-sm font-medium mb-2">Search</h3>
+              <input
+                type="text"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                placeholder="Search by event name"
+                className="w-full rounded-md border border-gray-700 bg-gray-800 px-3 py-2 text-sm text-gray-200 placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              />
+            </div>
+
+            <div>
+              <h3 className="text-gray-300 text-sm font-medium mb-2">
+                Category
+              </h3>
+              <select
+                value={selectedCategory}
+                onChange={(e) => setSelectedCategory(e.target.value)}
+                className="w-full rounded-md border border-gray-700 bg-gray-800 px-3 py-2 text-sm text-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              >
+                <option value="">All categories</option>
+                {categories.map((category) => (
+                  <option key={category} value={category}>
+                    {category}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <h3 className="text-gray-300 text-sm font-medium mb-2">Tags</h3>
+              <div className="max-h-28 overflow-y-auto rounded-md border border-gray-800 bg-gray-800/60 p-2 space-y-1">
+                {tags.length === 0 && (
+                  <div className="text-xs text-gray-500">No tags available</div>
+                )}
+                {tags.map((tag) => (
+                  <label
+                    key={tag}
+                    className="flex items-center gap-2 text-xs text-gray-300"
+                  >
+                    <input
+                      type="checkbox"
+                      checked={selectedTags.has(tag)}
+                      onChange={() => toggleTag(tag)}
+                      className="w-3.5 h-3.5 rounded accent-indigo-500"
+                    />
+                    <span>{tag}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
+
+            <label className="flex items-center gap-3 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={showOnlyFeatured}
+                onChange={(e) => setShowOnlyFeatured(e.target.checked)}
+                className="w-4 h-4 rounded accent-indigo-500"
+              />
+              <span className="text-gray-300 text-sm font-medium">
+                Show only featured events
+              </span>
+            </label>
+            <p className="text-gray-500 text-xs ml-7">
+              Enabled by default on load to reduce map noise.
+            </p>
+          </div>
+
           {/* Event visibility toggles */}
           <div>
-            <h3 className="text-gray-300 text-sm font-medium mb-3">Events</h3>
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-gray-300 text-sm font-medium">Events</h3>
+              <span className="text-xs text-gray-500">
+                {filteredEvents.length} / {events.length}
+              </span>
+            </div>
             <div className="space-y-2">
-              {events.map((event) => (
+              {filteredEvents.map((event) => (
                 <label
                   key={event.id}
                   className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-800/50 cursor-pointer transition-colors"
@@ -134,12 +227,34 @@ export default function SettingsPanel() {
                     style={{ backgroundColor: event.colour }}
                   />
                   <div className="flex-1 min-w-0">
-                    <div className="text-gray-200 text-sm truncate">
+                    <div className="text-gray-200 text-sm truncate flex items-center gap-2">
                       {event.name}
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          void toggleFeatured(event.id);
+                        }}
+                        className="text-xs leading-none"
+                        title={
+                          event.featured ? "Unfeature event" : "Feature event"
+                        }
+                      >
+                        {event.featured ? "★" : "☆"}
+                      </button>
                     </div>
                     <div className="text-gray-500 text-xs">
                       {event.from} – {event.to}
                     </div>
+                    <div className="text-gray-500 text-xs">
+                      {event.category}
+                    </div>
+                    {event.tagsNames.length > 0 && (
+                      <div className="text-gray-600 text-xs">
+                        Tags: {event.tagsNames.join(", ")}
+                      </div>
+                    )}
                     {event.influencedByNames.length > 0 && (
                       <div className="text-gray-600 text-xs italic">
                         Influenced by: {event.influencedByNames.join(", ")}

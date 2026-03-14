@@ -10,23 +10,30 @@ export interface TimelineEvent {
   colour: string;
   locations: string; // JSON array of ISO alpha-3 country codes
   influencedBy: string; // JSON array of event names
+  category: string;
+  tags: string; // JSON array of tag names
+  featured: boolean;
+  link: string;
   createdAt: string;
   updatedAt: string;
 }
 
 export interface TimelineEventParsed extends Omit<
   TimelineEvent,
-  "locations" | "influencedBy"
+  "locations" | "influencedBy" | "tags"
 > {
   locationCodes: string[];
   influencedByNames: string[];
+  tagsNames: string[];
 }
 
 export function parseEvent(event: TimelineEvent): TimelineEventParsed {
   return {
     ...event,
+    link: event.link || "",
     locationCodes: JSON.parse(event.locations) as string[],
     influencedByNames: JSON.parse(event.influencedBy) as string[],
+    tagsNames: JSON.parse(event.tags || "[]") as string[],
   };
 }
 

@@ -4,6 +4,7 @@ import WorldMap from "./components/WorldMap";
 import TimelineScrobbler from "./components/TimelineScrobbler";
 import SettingsPanel from "./components/SettingsPanel";
 import Legend from "./components/Legend";
+import EventDetailsPanel from "./components/EventDetailsPanel";
 
 export default function App() {
   return (
@@ -15,6 +16,7 @@ export default function App() {
 
           {/* Floating UI overlays */}
           <Legend />
+          <EventDetailsPanel />
           <SettingsPanel />
           <TimelineScrobbler />
         </div>
