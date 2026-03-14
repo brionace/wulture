@@ -125,8 +125,7 @@ export default function WorldMap() {
     }
 
     const centerLon = (Math.atan2(y, x) * 180) / Math.PI;
-    const centerLat =
-      (Math.atan2(z, Math.sqrt(x * x + y * y)) * 180) / Math.PI;
+    const centerLat = (Math.atan2(z, Math.sqrt(x * x + y * y)) * 180) / Math.PI;
 
     return [-centerLon, -centerLat, 0];
   }, [mapProjection, activeEvent, countryCenters]);
@@ -164,7 +163,10 @@ export default function WorldMap() {
 
           const stiffness = Math.min(8 * dt, 1);
           const nextLon = ((prev[0] + lonDelta * stiffness + 180) % 360) - 180;
-          const nextLat = Math.max(-80, Math.min(80, prev[1] + latDelta * stiffness));
+          const nextLat = Math.max(
+            -80,
+            Math.min(80, prev[1] + latDelta * stiffness),
+          );
 
           return [nextLon, nextLat, 0];
         });
