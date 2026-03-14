@@ -1,3 +1,6 @@
 // app.js — Plesk/Passenger entry point
-// Node 25+ handles TypeScript natively (type stripping)
-await import("./server/src/index.ts");
+// Dynamic import avoids top-level await, which Passenger's require() cannot handle
+import("./server/src/index.ts").catch((err) => {
+  console.error(err);
+  process.exit(1);
+});
