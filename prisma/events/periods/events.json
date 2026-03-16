@@ -19,7 +19,7 @@
       "AUT"
     ],
     "influencedBy": ["Roman Empire"],
-    "category": "Epoch",
+    "category": "Period",
     "tags": ["art", "science", "europe"],
     "featured": false,
     "link": "https://en.wikipedia.org/wiki/Renaissance"
@@ -47,7 +47,7 @@
       "PHL"
     ],
     "influencedBy": ["Renaissance"],
-    "category": "Epoch",
+    "category": "Period",
     "tags": ["navigation", "colonial", "trade", "exploration", "discovery"],
     "featured": false,
     "link": "https://en.wikipedia.org/wiki/Age_of_Discovery"
@@ -61,7 +61,7 @@
     "colour": "#0ea5e9",
     "locations": ["ITA", "GBR", "FRA", "DEU", "NLD", "POL", "CZE", "AUT"],
     "influencedBy": ["Renaissance"],
-    "category": "Epoch",
+    "category": "Period",
     "tags": ["science", "astronomy", "physics", "europe"],
     "featured": false,
     "link": "https://en.wikipedia.org/wiki/Scientific_Revolution"
@@ -75,7 +75,7 @@
     "colour": "#a855f7",
     "locations": ["FRA", "GBR", "DEU", "NLD", "CHE", "USA"],
     "influencedBy": ["Scientific Revolution"],
-    "category": "Epoch",
+    "category": "Period",
     "tags": ["philosophy", "reason", "politics", "modernity"],
     "featured": false,
     "link": "https://en.wikipedia.org/wiki/Age_of_Enlightenment"
@@ -89,7 +89,7 @@
     "colour": "#b45309",
     "locations": ["GBR", "FRA", "DEU", "BEL", "NLD", "USA", "ITA", "RUS"],
     "influencedBy": ["British Empire"],
-    "category": "Epoch",
+    "category": "Period",
     "tags": ["steam", "manufacturing", "urbanization"],
     "featured": true,
     "link": "https://en.wikipedia.org/wiki/Industrial_Revolution"
@@ -103,7 +103,7 @@
     "colour": "#d97706",
     "locations": ["GBR", "DEU", "USA", "FRA", "BEL", "ITA", "JPN"],
     "influencedBy": ["Industrial Revolution"],
-    "category": "Epoch",
+    "category": "Period",
     "tags": ["electricity", "steel", "chemicals", "mass-production"],
     "featured": true,
     "link": "https://en.wikipedia.org/wiki/Second_Industrial_Revolution"
@@ -117,7 +117,7 @@
     "colour": "#2563eb",
     "locations": ["USA", "RUS", "GBR", "FRA", "CHN", "IND", "JPN"],
     "influencedBy": ["World War II"],
-    "category": "Epoch",
+    "category": "Period",
     "tags": ["nuclear", "energy", "cold-war", "technology"],
     "featured": false,
     "link": "https://en.wikipedia.org/wiki/Atomic_Age"
@@ -146,7 +146,7 @@
       "KOR"
     ],
     "influencedBy": ["Cold War"],
-    "category": "Epoch",
+    "category": "Period",
     "tags": ["space", "satellites", "technology"],
     "featured": true,
     "link": "https://en.wikipedia.org/wiki/Space_Age"
@@ -177,7 +177,7 @@
       "ISR"
     ],
     "influencedBy": ["Cold War"],
-    "category": "Epoch",
+    "category": "Period",
     "tags": ["internet", "digital", "globalization"],
     "featured": true,
     "link": "https://en.wikipedia.org/wiki/Internet_Era"
@@ -203,7 +203,7 @@
       "ARE"
     ],
     "influencedBy": ["Internet Era"],
-    "category": "Epoch",
+    "category": "Period",
     "tags": ["globalization", "trade", "logistics", "interconnected"],
     "featured": true,
     "link": "https://en.wikipedia.org/wiki/Globalization"
