@@ -21,6 +21,8 @@ interface TimelineContextValue {
   minYear: number;
   maxYear: number;
   activeEvent: TimelineEventParsed | null;
+  pinnedEvent: TimelineEventParsed | null;
+  setPinnedEvent: (event: TimelineEventParsed | null) => void;
 }
 
 const TimelineContext = createContext<TimelineContextValue | null>(null);
@@ -53,6 +55,7 @@ export function TimelineProvider({ children }: { children: ReactNode }) {
   const [currentYear, setCurrentYear] = useState(DEFAULT_MIN_YEAR);
   const [isPlaying, setIsPlaying] = useState(false);
   const [playSpeed, setPlaySpeed] = useState(10);
+  const [pinnedEvent, setPinnedEvent] = useState<TimelineEventParsed | null>(null);
   const lastFrameTime = useRef<number | null>(null);
   const animRef = useRef<number>(0);
 
@@ -126,6 +129,8 @@ export function TimelineProvider({ children }: { children: ReactNode }) {
         minYear,
         maxYear,
         activeEvent,
+        pinnedEvent,
+        setPinnedEvent,
       }}
     >
       {children}

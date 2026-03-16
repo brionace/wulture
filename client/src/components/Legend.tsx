@@ -1,5 +1,6 @@
 import { useTimeline } from "../context/TimelineContext";
 import { useSettings } from "../context/SettingsContext";
+import type { TimelineEventParsed } from "../types";
 
 function formatYear(year: number): string {
   if (year < 0) return `${Math.abs(Math.round(year))} BC`;
@@ -7,7 +8,7 @@ function formatYear(year: number): string {
 }
 
 export default function Legend() {
-  const { currentYear } = useTimeline();
+  const { currentYear, pinnedEvent, setPinnedEvent } = useTimeline();
   const { filteredEvents, visibleEventIds } = useSettings();
 
   const activeEvents = filteredEvents.filter(
@@ -25,15 +26,34 @@ export default function Legend() {
         Active at {formatYear(currentYear)}
       </div>
       <div className="space-y-1.5">
-        {activeEvents.map((event) => (
-          <div key={event.id} className="flex items-center gap-2">
-            <span
-              className="w-3 h-3 rounded-full shrink-0"
-              style={{ backgroundColor: event.colour }}
-            />
-            <span className="text-gray-200 text-sm truncate">{event.name}</span>
-          </div>
-        ))}
+        {activeEvents.map((event: TimelineEventParsed) => {
+          const isSelected = pinnedEvent?.id === event.id;
+          return (
+            <button
+              key={event.id}
+              type="button"
+              onClick={() =>
+                setPinnedEvent(isSelected ? null : event)
+              }
+              className={`flex w-full items-center gap-2 rounded px-1 py-0.5 text-left transition-colors hover:bg-gray-700/50 ${
+                isSelected ? "bg-gray-700/60 ring-1 ring-indigo-400/50" : ""
+              }`}
+              title={isSelected ? "Deselect event" : "View Wikipedia article"}
+            >
+              <span
+                className="w-3 h-3 rounded-full shrink-0"
+                style={{ backgroundColor: event.colour }}
+              />
+              <span
+                className={`text-sm truncate ${
+                  isSelected ? "text-indigo-200" : "text-gray-200"
+                }`}
+              >
+                {event.name}
+              </span>
+            </button>
+          );
+        })}
       </div>
     </div>
   );

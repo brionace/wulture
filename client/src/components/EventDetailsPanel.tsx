@@ -24,14 +24,15 @@ function EventDetailsContent({
   collapsed: boolean;
   onToggleCollapse: () => void;
 }) {
-  const { activeEvent } = useTimeline();
+  const { activeEvent, pinnedEvent } = useTimeline();
+  const displayEvent = pinnedEvent ?? activeEvent;
 
   const safeLink = useMemo(() => {
-    const candidate = activeEvent?.link?.trim() ?? "";
+    const candidate = displayEvent?.link?.trim() ?? "";
     return isWikipediaLink(candidate) ? candidate : "";
-  }, [activeEvent]);
+  }, [displayEvent]);
 
-  const title = activeEvent ? activeEvent.name : "No active event";
+  const title = displayEvent ? displayEvent.name : "No active event";
 
   return (
     <>
@@ -71,7 +72,7 @@ function EventDetailsContent({
             <iframe
               key={safeLink}
               src={safeLink}
-              title={`Wikipedia article for ${activeEvent?.name ?? "event"}`}
+              title={`Wikipedia article for ${displayEvent?.name ?? "event"}`}
               loading="lazy"
               referrerPolicy="no-referrer"
               sandbox="allow-same-origin allow-scripts allow-popups allow-popups-to-escape-sandbox"
@@ -79,7 +80,7 @@ function EventDetailsContent({
             />
           ) : (
             <div className="flex h-full items-center justify-center px-4 text-center text-sm text-gray-400">
-              {activeEvent
+              {displayEvent
                 ? "No Wikipedia link available for this event yet."
                 : "No event is active at the current timeline year."}
             </div>
