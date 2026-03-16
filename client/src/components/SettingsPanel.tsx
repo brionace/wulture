@@ -1,6 +1,11 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useSettings } from "../context/SettingsContext";
 import { useTimeline } from "../context/TimelineContext";
+
+type SearchSuggestion = {
+  type: "name" | "category" | "tag";
+  value: string;
+};
 
 export default function SettingsPanel() {
   const [isOpen, setIsOpen] = useState(false);
@@ -32,6 +37,66 @@ export default function SettingsPanel() {
   const tags = Array.from(
     new Set(events.flatMap((event) => event.tagsNames)),
   ).sort();
+
+  const suggestions = useMemo(() => {
+    const query = searchTerm.trim().toLowerCase();
+    if (!query) {
+      return [] as SearchSuggestion[];
+    }
+
+    const next: SearchSuggestion[] = [];
+    const seen = new Set<string>();
+
+    for (const event of events) {
+      if (event.name.toLowerCase().includes(query)) {
+        const key = `name:${event.name}`;
+        if (!seen.has(key)) {
+          seen.add(key);
+          next.push({ type: "name", value: event.name });
+        }
+      }
+    }
+
+    for (const category of categories) {
+      if (category.toLowerCase().includes(query)) {
+        const key = `category:${category}`;
+        if (!seen.has(key)) {
+          seen.add(key);
+          next.push({ type: "category", value: category });
+        }
+      }
+    }
+
+    for (const tag of tags) {
+      if (tag.toLowerCase().includes(query)) {
+        const key = `tag:${tag}`;
+        if (!seen.has(key)) {
+          seen.add(key);
+          next.push({ type: "tag", value: tag });
+        }
+      }
+    }
+
+    return next.slice(0, 12);
+  }, [searchTerm, events, categories, tags]);
+
+  const applySuggestion = (suggestion: SearchSuggestion) => {
+    if (suggestion.type === "name") {
+      setSearchTerm(suggestion.value);
+      return;
+    }
+
+    if (suggestion.type === "category") {
+      setSelectedCategory(suggestion.value);
+      setSearchTerm("");
+      return;
+    }
+
+    if (!selectedTags.has(suggestion.value)) {
+      toggleTag(suggestion.value);
+    }
+    setSearchTerm("");
+  };
 
   return (
     <>
@@ -142,6 +207,7 @@ export default function SettingsPanel() {
               onChange={(e) =>
                 setMapProjection(e.target.value as "flat" | "rounded")
               }
+              aria-label="Map projection"
               className="w-full rounded-md border border-gray-700 bg-gray-800 px-3 py-2 text-sm text-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500"
             >
               <option value="flat">Flat Map</option>
@@ -160,9 +226,59 @@ export default function SettingsPanel() {
                 type="text"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                placeholder="Search by event name"
+                placeholder="Search names, categories, or tags"
                 className="w-full rounded-md border border-gray-700 bg-gray-800 px-3 py-2 text-sm text-gray-200 placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
               />
+              {suggestions.length > 0 && (
+                <div className="mt-2 max-h-40 overflow-y-auto rounded-md border border-gray-700 bg-gray-800/95">
+                  {suggestions.map((suggestion) => (
+                    <button
+                      key={`${suggestion.type}:${suggestion.value}`}
+                      type="button"
+                      onClick={() => applySuggestion(suggestion)}
+                      className="flex w-full items-center gap-2 px-3 py-2 text-left text-xs text-gray-300 hover:bg-gray-700/70"
+                    >
+                      <span className="rounded bg-indigo-500/20 px-1.5 py-0.5 text-[10px] uppercase tracking-wide text-indigo-300">
+                        {suggestion.type}
+                      </span>
+                      <span className="truncate">{suggestion.value}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+              {(selectedCategory || selectedTags.size > 0) && (
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {selectedCategory && (
+                    <span className="inline-flex items-center gap-1 rounded-full bg-indigo-500/20 px-2 py-1 text-xs text-indigo-200">
+                      category: {selectedCategory}
+                      <button
+                        type="button"
+                        onClick={() => setSelectedCategory("")}
+                        className="rounded px-1 leading-none hover:bg-indigo-400/20"
+                        aria-label={`Remove category ${selectedCategory}`}
+                      >
+                        x
+                      </button>
+                    </span>
+                  )}
+                  {Array.from(selectedTags).map((tag) => (
+                    <span
+                      key={tag}
+                      className="inline-flex items-center gap-1 rounded-full bg-indigo-500/20 px-2 py-1 text-xs text-indigo-200"
+                    >
+                      tag: {tag}
+                      <button
+                        type="button"
+                        onClick={() => toggleTag(tag)}
+                        className="rounded px-1 leading-none hover:bg-indigo-400/20"
+                        aria-label={`Remove tag ${tag}`}
+                      >
+                        x
+                      </button>
+                    </span>
+                  ))}
+                </div>
+              )}
             </div>
 
             <div>
@@ -172,6 +288,7 @@ export default function SettingsPanel() {
               <select
                 value={selectedCategory}
                 onChange={(e) => setSelectedCategory(e.target.value)}
+                aria-label="Event category"
                 className="w-full rounded-md border border-gray-700 bg-gray-800 px-3 py-2 text-sm text-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500"
               >
                 <option value="">All categories</option>
@@ -270,11 +387,6 @@ export default function SettingsPanel() {
                     <div className="text-gray-500 text-xs">
                       {event.category}
                     </div>
-                    {event.tagsNames.length > 0 && (
-                      <div className="text-gray-600 text-xs">
-                        Tags: {event.tagsNames.join(", ")}
-                      </div>
-                    )}
                     {event.influencedByNames.length > 0 && (
                       <div className="text-gray-600 text-xs italic">
                         Influenced by: {event.influencedByNames.join(", ")}

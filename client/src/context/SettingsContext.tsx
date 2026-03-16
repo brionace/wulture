@@ -37,20 +37,69 @@ interface SettingsContextValue {
 
 const SettingsContext = createContext<SettingsContextValue | null>(null);
 
+function getDeepLinkState(): {
+  searchTerm: string;
+  selectedCategory: string;
+  selectedTags: Set<string>;
+  showOnlyFeatured: boolean;
+  showInfluence: boolean;
+  mapProjection: "flat" | "rounded";
+} {
+  if (typeof window === "undefined") {
+    return {
+      searchTerm: "",
+      selectedCategory: "",
+      selectedTags: new Set<string>(),
+      showOnlyFeatured: true,
+      showInfluence: false,
+      mapProjection: "flat" as "flat" | "rounded",
+    };
+  }
+
+  const params = new URLSearchParams(window.location.search);
+  const tagsParam = params.get("tags")?.trim() ?? "";
+  const selectedTags = new Set(
+    tagsParam
+      .split(",")
+      .map((tag) => tag.trim())
+      .filter(Boolean),
+  );
+
+  const projection = params.get("projection");
+
+  return {
+    searchTerm: params.get("q")?.trim() ?? "",
+    selectedCategory: params.get("category")?.trim() ?? "",
+    selectedTags,
+    showOnlyFeatured: params.get("featured") !== "0",
+    showInfluence: params.get("influence") === "1",
+    mapProjection: projection === "rounded" ? "rounded" : "flat",
+  };
+}
+
 export function SettingsProvider({ children }: { children: ReactNode }) {
+  const deepLinkState = useMemo(getDeepLinkState, []);
   const [events, setEvents] = useState<TimelineEventParsed[]>([]);
   const [visibleEventIds, setVisibleEventIds] = useState<Set<number>>(
     new Set(),
   );
   const [loading, setLoading] = useState(true);
-  const [showInfluence, setShowInfluence] = useState(false);
-  const [mapProjection, setMapProjection] = useState<"flat" | "rounded">(
-    "flat",
+  const [showInfluence, setShowInfluence] = useState(
+    deepLinkState.showInfluence,
   );
-  const [searchTerm, setSearchTerm] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("");
-  const [selectedTags, setSelectedTags] = useState<Set<string>>(new Set());
-  const [showOnlyFeatured, setShowOnlyFeatured] = useState(true);
+  const [mapProjection, setMapProjection] = useState<"flat" | "rounded">(
+    deepLinkState.mapProjection,
+  );
+  const [searchTerm, setSearchTerm] = useState(deepLinkState.searchTerm);
+  const [selectedCategory, setSelectedCategory] = useState(
+    deepLinkState.selectedCategory,
+  );
+  const [selectedTags, setSelectedTags] = useState<Set<string>>(
+    deepLinkState.selectedTags,
+  );
+  const [showOnlyFeatured, setShowOnlyFeatured] = useState(
+    deepLinkState.showOnlyFeatured,
+  );
 
   useEffect(() => {
     fetch(`${API_URL}/api/events`)
@@ -130,6 +179,63 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
     },
     [events],
   );
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const params = new URLSearchParams(window.location.search);
+
+    const query = searchTerm.trim();
+    if (query) {
+      params.set("q", query);
+    } else {
+      params.delete("q");
+    }
+
+    if (selectedCategory) {
+      params.set("category", selectedCategory);
+    } else {
+      params.delete("category");
+    }
+
+    if (selectedTags.size > 0) {
+      params.set("tags", Array.from(selectedTags).sort().join(","));
+    } else {
+      params.delete("tags");
+    }
+
+    if (!showOnlyFeatured) {
+      params.set("featured", "0");
+    } else {
+      params.delete("featured");
+    }
+
+    if (showInfluence) {
+      params.set("influence", "1");
+    } else {
+      params.delete("influence");
+    }
+
+    if (mapProjection === "rounded") {
+      params.set("projection", "rounded");
+    } else {
+      params.delete("projection");
+    }
+
+    const queryString = params.toString();
+    const nextUrl = queryString
+      ? `${window.location.pathname}?${queryString}${window.location.hash}`
+      : `${window.location.pathname}${window.location.hash}`;
+
+    window.history.replaceState(null, "", nextUrl);
+  }, [
+    searchTerm,
+    selectedCategory,
+    selectedTags,
+    showOnlyFeatured,
+    showInfluence,
+    mapProjection,
+  ]);
 
   return (
     <SettingsContext.Provider

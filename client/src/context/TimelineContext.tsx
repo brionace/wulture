@@ -31,6 +31,13 @@ const DEFAULT_MAX_YEAR = new Date().getFullYear();
 export function TimelineProvider({ children }: { children: ReactNode }) {
   const { events, filteredEvents, visibleEventIds } = useSettings();
   const timelineEvents = filteredEvents.length > 0 ? filteredEvents : events;
+  const firstListedEvent = useMemo(
+    () =>
+      timelineEvents.find((event) => visibleEventIds.has(event.id)) ??
+      timelineEvents[0] ??
+      null,
+    [timelineEvents, visibleEventIds],
+  );
   const minYear = useMemo(
     () => timelineEvents[0]?.yearFrom ?? DEFAULT_MIN_YEAR,
     [timelineEvents],
@@ -67,6 +74,14 @@ export function TimelineProvider({ children }: { children: ReactNode }) {
       return prev;
     });
   }, [minYear, maxYear]);
+
+  useEffect(() => {
+    if (!firstListedEvent) {
+      return;
+    }
+
+    setCurrentYear(firstListedEvent.yearFrom);
+  }, [firstListedEvent]);
 
   const togglePlay = useCallback(() => {
     setIsPlaying((prev) => !prev);
