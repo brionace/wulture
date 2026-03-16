@@ -32,9 +32,7 @@ export default function Legend() {
             <button
               key={event.id}
               type="button"
-              onClick={() =>
-                setPinnedEvent(isSelected ? null : event)
-              }
+              onClick={() => setPinnedEvent(isSelected ? null : event)}
               className={`flex w-full items-center gap-2 rounded px-1 py-0.5 text-left transition-colors hover:bg-gray-700/50 ${
                 isSelected ? "bg-gray-700/60 ring-1 ring-indigo-400/50" : ""
               }`}
