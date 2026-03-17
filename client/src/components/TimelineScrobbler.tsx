@@ -1,8 +1,22 @@
+import { useMemo } from "react";
 import { useTimeline } from "../context/TimelineContext";
 
 function formatYear(year: number): string {
   if (year < 0) return `${Math.abs(Math.round(year))} BC`;
   return `${Math.round(year)} AD`;
+}
+
+function buildTicks(minYear: number, maxYear: number) {
+  const steps = 4;
+  const range = maxYear - minYear;
+
+  return Array.from({ length: steps + 1 }, (_, index) => {
+    const year = Math.round(minYear + (range * index) / steps);
+    return {
+      key: `${index}-${year}`,
+      year,
+    };
+  });
 }
 
 export default function TimelineScrobbler() {
@@ -17,37 +31,39 @@ export default function TimelineScrobbler() {
     maxYear,
   } = useTimeline();
 
+  const ticks = useMemo(() => buildTicks(minYear, maxYear), [minYear, maxYear]);
+
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-40 bg-gray-900/90 backdrop-blur-sm border-t border-gray-700/50 px-6 py-3">
-      <div className="flex items-center gap-4 max-w-7xl mx-auto">
-        {/* Play/Pause button */}
+    <div className="fixed bottom-0 left-0 right-0 z-40 backdrop-blur-sm">
+      <div className="mx-auto flex max-w-7xl items-center gap-3 rounded-xl border border-gray-700/60 bg-gray-900/55 px-3 py-2 shadow-[0_-8px_32px_rgba(0,0,0,0.3)] sm:gap-4">
         <button
           onClick={togglePlay}
-          className="flex items-center justify-center w-10 h-10 rounded-full bg-indigo-600 hover:bg-indigo-500 text-white transition-colors shrink-0"
+          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-indigo-300/25 bg-indigo-600 text-white transition-colors hover:bg-indigo-500"
           title={isPlaying ? "Pause" : "Play"}
         >
           {isPlaying ? (
-            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+            <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
               <rect x="5" y="4" width="3" height="12" rx="1" />
               <rect x="12" y="4" width="3" height="12" rx="1" />
             </svg>
           ) : (
-            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+            <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
               <polygon points="6,4 16,10 6,16" />
             </svg>
           )}
         </button>
 
-        {/* Current year display */}
-        <div className="text-white font-mono text-sm w-24 text-center shrink-0">
+        <div className="hidden shrink-0 rounded-full border border-gray-600 bg-gray-800 px-3 py-1 font-mono text-sm text-gray-100 sm:inline-flex">
           {formatYear(currentYear)}
         </div>
 
-        {/* Timeline slider */}
-        <div className="flex-1 flex items-center gap-3">
-          <span className="text-gray-500 text-xs shrink-0">
-            {formatYear(minYear)}
-          </span>
+        <div className="relative flex-1">
+          <div className="pointer-events-none absolute inset-x-0 top-1/2 h-px -translate-y-1/2 bg-gradient-to-r from-gray-700 via-indigo-400/40 to-gray-700" />
+          <div className="pointer-events-none absolute inset-x-1 top-1/2 hidden -translate-y-1/2 items-center justify-between md:flex">
+            {ticks.map((tick) => (
+              <span key={tick.key} className="h-2.5 w-px bg-gray-500/80" />
+            ))}
+          </div>
           <input
             type="range"
             min={minYear}
@@ -55,21 +71,24 @@ export default function TimelineScrobbler() {
             step={1}
             value={currentYear}
             onChange={(e) => setCurrentYear(Number(e.target.value))}
-            className="flex-1 h-2 accent-indigo-500 cursor-pointer"
+            className="relative z-10 h-8 w-full cursor-pointer appearance-none bg-transparent accent-indigo-500"
             aria-label="Timeline year"
           />
-          <span className="text-gray-500 text-xs shrink-0">
-            {formatYear(maxYear)}
-          </span>
+          <div className="hidden items-center justify-between text-[11px] text-gray-400 md:flex">
+            {ticks.map((tick) => (
+              <span key={tick.key}>{formatYear(tick.year)}</span>
+            ))}
+          </div>
         </div>
 
-        {/* Speed control */}
         <div className="flex items-center gap-2 shrink-0">
-          <label className="text-gray-400 text-xs">Speed</label>
+          <span className="text-[11px] uppercase tracking-[0.2em] text-gray-400">
+            Speed
+          </span>
           <select
             value={playSpeed}
             onChange={(e) => setPlaySpeed(Number(e.target.value))}
-            className="bg-gray-800 text-gray-300 text-xs rounded px-2 py-1 border border-gray-600"
+            className="rounded-full border border-gray-600 bg-gray-800 px-3 py-1 text-xs text-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/60"
             aria-label="Playback speed"
           >
             <option value={1}>1x</option>
